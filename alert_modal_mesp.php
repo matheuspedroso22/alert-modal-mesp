@@ -32,7 +32,7 @@ add_action( 'init', 'create_post_type_alert_modal_mesp' );
 function alert_modal_mesp($atts) {
 
 	$default = array(
-		'title' => 'Messages',
+		'title' => '',
 		'modal_class' => '',
 	);
 	$shortcode_atts = shortcode_atts($default, $atts);
@@ -44,68 +44,57 @@ function alert_modal_mesp($atts) {
 		'post_type' 		  => 'alert-modal-mesp'
 	) );
 
-	if($post_alert->have_posts()){ ?>
-		<style>
-			#alertModalMesp{
-				color:#303030 !important;				
-			}
-			#alertModalMesp .alertContainer{
-				margin:10px auto;				
-			}
-			#alertModalMesp .alertTitle{
-				text-align: left;				
-			}			
-			#alertModalMesp .alertDate{
-				text-align: right;				
-			}		
-			#alertModalMesp .alertContent{
-				text-align: justify;				
-			}
-		</style>
+	$my_plugin_dir = WP_PLUGIN_DIR . '/alert_modal_mesp';
 
-		<!-- Modal -->
-		<div class="modal fade" id="alertModalMesp" tabindex="-1" aria-labelledby="alertModalMespLabel" aria-hidden="true">
-			<div class="modal-dialog <?=$shortcode_atts['modal_class']?>">
-				<div class="modal-content">
-					<div class="modal-header">
-						<h2 class="modal-title" id="alertModalMespLabel"><?=$shortcode_atts['title']?></h2>
-						<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-					</div>
-					<div class="modal-body">
-					
-						<?php
-						$count_alerts = 0;
-						foreach( $post_alert->posts as $page ) {     
+	if($post_alert->have_posts() AND is_dir($my_plugin_dir)){ ?>
 
-							if ( ! $page->post_content ) // Check for empty page
-							continue;
-					
-							if ( $count_alerts > 0 ) 
-							echo '<hr>';
-							?>
-							<div class='alertContainer'>
-								<h3 class='alertTitle'>
-									<?=$page->post_title?>
-								</h3>
-								<p class='alertContent'>
-									<?=$page->post_content?>
-								</p>
-								<p class='alertDate'>
-									<?=get_the_date( 'j F, Y', $page->ID  )?>
-								</p>
-							</div>
-							
-						<?php $count_alerts++;} ?>
+		<link rel='stylesheet' id='alert_modal_mesp-style-css' href='<?=plugins_url( 'alert_modal_mesp/assets/css/style.css', dirname(__FILE__) )?>' type='text/css' media='all' />
+	
+		<!-- The Modal -->
+		<div id="alert-modal-mesp" class="modal">
+
+			<!-- Modal content -->
+			<div class="modal-content <?=$shortcode_atts['modal_class']?> flip-top">
+				<span class="close" onclick="document.getElementById('alert-modal-mesp').style.display = 'none'">&times;</span>
+
+				<?php if(!empty($shortcode_atts['title'])){ ?>
+					<h2><?=$shortcode_atts['title']?></h2>
+				<?php } ?>
+				
+				<?php
+				$count_alerts = 0;
+				foreach( $post_alert->posts as $page ) {     
+
+					if ( ! $page->post_content ) // Check for empty page
+					continue;
 			
+					if ( $count_alerts > 0 ) 
+					echo '<hr>';
+					?>
+					<div class='alert-container'>
+						<h2 class='alert-title'>
+							<?=$page->post_title?>
+						</h2>
+						<div class='alert-content'>
+							<?=$page->post_content?>
+						</div>
+						<div class='alert-date'>
+							<?=get_the_date( 'j F, Y', $page->ID  )?>
+						</div>
 					</div>
-				</div>
+					
+				<?php $count_alerts++;} ?>
+
+				<hr>
+
+				<span class="close" onclick="document.getElementById('alert-modal-mesp').style.display = 'none'">Fechar</span>
+				
 			</div>
+
 		</div>
-		<script>
-			$(document).ready(function() {	
-				$('#alertModalMesp').modal('show');
-			});
-		</script>
+
+		<script type='text/javascript' id='alert_modal_mesp-js' src='<?=plugins_url( 'alert_modal_mesp/assets/js/script.js', dirname(__FILE__) )?>' ></script>
 	<?php } 
 }
 add_shortcode('alert_modal_mesp', 'alert_modal_mesp');
+add_action('wp_footer', 'alert_modal_mesp');
